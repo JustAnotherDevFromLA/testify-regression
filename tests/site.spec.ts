@@ -9,6 +9,14 @@ async function primaryNavigation(page: Page) {
   return page.getByRole('navigation', { name: 'Primary' });
 }
 
+async function expectAccessible(page: Page) {
+  const accessibilityScan = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+    .analyze();
+
+  expect(accessibilityScan.violations, JSON.stringify(accessibilityScan.violations, null, 2)).toEqual([]);
+}
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
 
@@ -39,7 +47,7 @@ test('homepage explains the offer and exposes the main visitor paths', {
 });
 
 test('visitor can learn about the company from the main navigation', {
-  tag: '@regression',
+  tag: ['@smoke', '@regression', '@accessibility'],
 }, async ({ page }) => {
   await (await primaryNavigation(page))
     .getByRole('link', { name: 'About', exact: true })
@@ -48,10 +56,11 @@ test('visitor can learn about the company from the main navigation', {
   await expect(page).toHaveURL(/\/about\/$/);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('About Testify Labs');
   await expect(page.getByRole('heading', { name: 'Team Testify' })).toBeVisible();
+  await expectAccessible(page);
 });
 
 test('visitor can open the latest article from the blog', {
-  tag: '@regression',
+  tag: ['@smoke', '@regression', '@accessibility'],
 }, async ({ page }) => {
   await (await primaryNavigation(page))
     .getByRole('link', { name: 'Blog', exact: true })
@@ -61,6 +70,7 @@ test('visitor can open the latest article from the blog', {
   await expect(
     page.getByRole('heading', { level: 1, name: /News, security guides and updates/i }),
   ).toBeVisible();
+  await expectAccessible(page);
   const latestArticle = page.getByRole('heading', { level: 2 }).first();
   await expect(latestArticle).toBeVisible();
   const latestArticleTitle = await latestArticle.innerText();
@@ -69,6 +79,8 @@ test('visitor can open the latest article from the blog', {
     latestArticle.getByRole('link').click(),
   ]);
   await expect(articlePage.getByRole('heading', { level: 1 })).toContainText(latestArticleTitle);
+  await expectAccessible(articlePage);
+  await articlePage.close();
 });
 
 test('visitor can find the newsletter signup without submitting it', {
@@ -85,7 +97,7 @@ test('visitor can find the newsletter signup without submitting it', {
 });
 
 test('demo journey opens the product page and its booking section', {
-  tag: '@smoke',
+  tag: ['@smoke', '@accessibility'],
 }, async ({ page }) => {
   await (await primaryNavigation(page))
     .getByRole('link', { name: /Book a demo/i })
@@ -96,6 +108,7 @@ test('demo journey opens the product page and its booking section', {
     'Agentic testing for your web app',
   );
   await expect(page.getByRole('heading', { name: /User Agents compile critical user journeys/i })).toBeVisible();
+  await expectAccessible(page);
 
   await page.getByRole('link', { name: 'Book Demo', exact: true }).click();
   await expect(page).toHaveURL(/\/demo\/#book$/);
@@ -115,7 +128,7 @@ test('schedule a demo CTA opens the contact booking section', {
 });
 
 test('contact journey shows contact channels and required form fields without submitting', {
-  tag: '@smoke',
+  tag: ['@smoke', '@accessibility'],
 }, async ({ page }) => {
   await (await primaryNavigation(page))
     .getByRole('link', { name: 'Contact', exact: true })
@@ -128,6 +141,7 @@ test('contact journey shows contact channels and required form fields without su
   await expect(page.getByRole('textbox', { name: 'Email' })).toHaveAttribute('required', 'true');
   await expect(page.getByRole('textbox', { name: 'Message' })).toHaveAttribute('required', '');
   await expect(page.getByRole('button', { name: 'Send Message' })).toBeVisible();
+  await expectAccessible(page);
 });
 
 test('homepage FAQ explains how new customers get started', {
@@ -139,11 +153,7 @@ test('homepage FAQ explains how new customers get started', {
 });
 
 test('homepage has no WCAG A/AA automated accessibility violations', {
-  tag: ['@regression', '@accessibility'],
+  tag: ['@smoke', '@regression', '@accessibility'],
 }, async ({ page }) => {
-  const accessibilityScan = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
-    .analyze();
-
-  expect(accessibilityScan.violations, JSON.stringify(accessibilityScan.violations, null, 2)).toEqual([]);
+  await expectAccessible(page);
 });

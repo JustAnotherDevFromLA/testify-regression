@@ -7,6 +7,7 @@
     "test": "playwright test",
     "test:smoke": "playwright test --grep @smoke",
     "test:regression": "playwright test --grep @regression",
+    "test:accessibility": "playwright test --grep @accessibility",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
     "report": "monocart show-report monocart-report/index.html",

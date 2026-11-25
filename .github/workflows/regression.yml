@@ -26,7 +26,7 @@ concurrency:
 
 jobs:
   regression:
-    name: Playwright regression
+    name: UI test gate
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

@@ -38,6 +38,6 @@ Use `npm run test:smoke` for the small critical-path set and `npm run test:regre
 
 `.github/workflows/regression.yml` runs the smoke suite on pushes and pull requests, and the full suite every day at 16:00 UTC (08:00 PST / 09:00 PDT) on a GitHub-hosted Ubuntu runner. CI runs typecheck and lint before browser tests, and uses one worker per job for stability. A manual run lets you choose the full or smoke suite from **Actions > Daily site regression > Run workflow**. The full suite covers Chromium, Firefox, and WebKit on desktop plus the smoke journeys on Pixel 7 emulation. Playwright stops a run after 15 minutes; the workflow job limit is 20 minutes.
 
-The workflow uploads the HTML report and failure artifacts for 14 days. The workflow must be committed to a GitHub repository for GitHub Actions to schedule it; scheduled runs use the default branch.
+The PR/push **UI test gate** runs the smoke-tagged journeys, including the accessibility scans for the homepage, About page, blog and article, demo page, and contact page. The daily schedule and on-demand full run execute the complete suite. To block merges on this result, a repository administrator must require the `UI test gate` status check in GitHub branch protection for `master`; that setting is managed in GitHub, not this repository. The workflow uploads the HTML report and failure artifacts for 14 days. Scheduled runs use the default branch.
 
 See [BENCHMARK.md](./BENCHMARK.md) for the latest local throughput comparison.
