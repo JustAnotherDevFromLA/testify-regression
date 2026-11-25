@@ -3,3 +3,4 @@ playwright-report/
 monocart-report/
 test-results/
 playwright/.cache/
+.cache/

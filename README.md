@@ -30,7 +30,7 @@ npm run typecheck
 npm run lint
 ```
 
-Every test captures an end-of-test screenshot; failed tests also retain traces. The Monocart HTML report links to the screenshots and test result details. Open it locally with `npm run report` after a test run. On GitHub Actions, download the `testify-regression-report-*` artifact for the HTML report and screenshot evidence. Local runs print the test list; CI also emits GitHub failure annotations.
+Every test captures an end-of-test screenshot; failed tests also retain traces. The Monocart HTML report links to the screenshots and test result details. Open it locally with `npm run report` after a test run. On GitHub Actions, download the `testify-regression-report-*` artifact for the HTML report and screenshot evidence. Local runs print the test list; CI also emits GitHub failure annotations. Scheduled and manually requested full runs keep up to 30 prior full-run summaries in the Monocart trend chart using a branch-scoped GitHub Actions cache. Smoke and pull request runs do not update trend history, keeping full-run comparisons consistent.
 
 Use `npm run test:smoke` for the small critical-path set and `npm run test:regression` for the broader suite. `npm test` runs both. To run in a visible browser, use `npm run test:headed`. To use Playwright's interactive runner, use `npm run test:ui`. Set `SITE_BASE_URL` to target a staging copy.
 

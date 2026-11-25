@@ -50,6 +50,19 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
+      - name: Prepare Monocart history cache
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.suite == 'full')
+        run: mkdir -p .cache
+
+      - name: Restore previous Monocart report history
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.suite == 'full')
+        uses: actions/cache/restore@v4
+        with:
+          path: .cache/monocart-history.json
+          key: monocart-history-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            monocart-history-${{ github.ref_name }}-
+
       - name: Run regression suite
         env:
           REGRESSION_SUITE: ${{ inputs.suite || (github.event_name == 'schedule' && 'full' || 'smoke') }}
@@ -59,6 +72,18 @@ jobs:
           else
             npm test
           fi
+
+      - name: Update cached Monocart history
+        id: update-monocart-history
+        if: ${{ always() && !cancelled() && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.suite == 'full')) && hashFiles('monocart-report/index.json') != '' }}
+        run: cp monocart-report/index.json .cache/monocart-history.json
+
+      - name: Save Monocart report history
+        if: ${{ always() && !cancelled() && steps.update-monocart-history.outcome == 'success' }}
+        uses: actions/cache/save@v4
+        with:
+          path: .cache/monocart-history.json
+          key: monocart-history-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Upload Playwright report
         if: always()

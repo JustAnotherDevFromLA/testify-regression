@@ -1,4 +1,29 @@
 import { defineConfig, devices } from '@playwright/test';
+import { existsSync, readFileSync } from 'node:fs';
+
+const monocartHistoryPath = '.cache/monocart-history.json';
+
+async function loadMonocartTrend() {
+  if (!existsSync(monocartHistoryPath)) {
+    return undefined;
+  }
+
+  try {
+    const previousReport = JSON.parse(readFileSync(monocartHistoryPath, 'utf8'));
+    if (typeof previousReport.date !== 'number' || !previousReport.summary) {
+      return undefined;
+    }
+
+    if (Array.isArray(previousReport.trends)) {
+      previousReport.trends = previousReport.trends.slice(-29);
+    }
+
+    return previousReport;
+  } catch {
+    // History is optional; a corrupt or stale cache must not block test runs.
+    return undefined;
+  }
+}
 
 export default defineConfig({
   testDir: './tests',
@@ -14,6 +39,7 @@ export default defineConfig({
       {
         name: 'Testify Solutions Regression',
         outputFile: 'monocart-report/index.html',
+        trend: loadMonocartTrend,
       },
     ],
   ],
