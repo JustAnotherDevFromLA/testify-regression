@@ -1,0 +1,24 @@
+{
+  "name": "testify-solutions-regression",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright smoke and regression checks for testifysolutions.net",
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.65.1",
+    "@types/node": "26.6.6",
+    "eslint": "^10.15.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.74.0"
+  }
+}

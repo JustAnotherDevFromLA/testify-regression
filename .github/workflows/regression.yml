@@ -1,0 +1,71 @@
+name: Daily site regression
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # 08:00 Pacific Standard Time (09:00 during daylight saving time).
+    - cron: '0 16 * * *'
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Test scope for an on-demand run
+        type: choice
+        options:
+          - full
+          - smoke
+        default: full
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-regression-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regression:
+    name: Playwright regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck and lint
+        run: |
+          npm run typecheck
+          npm run lint
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run regression suite
+        env:
+          REGRESSION_SUITE: ${{ inputs.suite || (github.event_name == 'schedule' && 'full' || 'smoke') }}
+        run: |
+          if [ "$REGRESSION_SUITE" = "smoke" ]; then
+            npm run test:smoke
+          else
+            npm test
+          fi
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
