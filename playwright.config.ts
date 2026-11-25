@@ -8,14 +8,20 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   globalTimeout: 15 * 60 * 1000,
   reporter: [
-    ['list'],
-    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    [process.env.CI ? 'github' : 'list'],
+    [
+      'monocart-reporter',
+      {
+        name: 'Testify Solutions Regression',
+        outputFile: 'monocart-report/index.html',
+      },
+    ],
   ],
   outputDir: 'test-results',
   use: {
     baseURL: process.env.SITE_BASE_URL ?? 'https://testifysolutions.net',
     trace: 'retain-on-failure',
-    screenshot: 'only-on-failure',
+    screenshot: 'on',
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
